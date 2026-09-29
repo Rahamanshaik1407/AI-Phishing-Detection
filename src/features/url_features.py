@@ -21,7 +21,16 @@ SUSPICIOUS_KEYWORDS = [
     "payment",
     "authenticate",
 ]
+def normalize_url(url):
+    url = str(url).strip()
 
+    if not url:
+        return ""
+
+    if not url.startswith(("http://", "https://")):
+        url = "http://" + url
+
+    return url
 
 def is_ip_address(hostname):
     if not hostname:
@@ -35,6 +44,7 @@ def is_ip_address(hostname):
 
 
 def extract_url_features(url):
+    url = normalize_url(url)
 
     parsed = urlparse(url)
 
