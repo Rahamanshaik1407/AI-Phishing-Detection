@@ -469,3 +469,86 @@ Binary
 ```
 
 Future experiments should record their dataset, features, parameters, random seed, metrics, and limitations in this document.
+## Error Analysis
+
+Random Forest produced 11,432 classification errors on the test set.
+
+- False positives: 6,572
+- False negatives: 4,860
+
+### False Negative Analysis
+
+The false negatives were distributed across multiple malicious categories:
+
+- Phishing: 3,166
+- Defacement: 1,458
+- Malware: 236
+
+Examples of missed malicious URLs included URLs with relatively ordinary lexical structures as well as URLs containing suspicious-looking paths.
+
+This indicates that URL lexical features alone are insufficient for reliably identifying all malicious URLs.
+
+Potential missing signals include:
+
+- Domain reputation
+- Domain age
+- DNS characteristics
+- IP and ASN information
+- Brand/domain mismatch
+- Redirect behavior
+- Final destination
+- Webpage HTML characteristics
+- Login/password forms
+- External resource relationships
+- Threat-intelligence information
+
+### False Positive Analysis
+
+The model produced 6,572 false positives.
+
+Examples included legitimate URLs from domains such as:
+
+- Wikipedia
+- Reuters
+- Yahoo
+- FlightAware
+
+Some benign URLs contained terms or structures that can appear in malicious URLs, such as login-related words, payment-related terms, long paths, or unusual URL structures.
+
+This demonstrates that suspicious lexical characteristics should not automatically be treated as proof of maliciousness.
+
+### Research Finding
+
+The error analysis demonstrates a limitation of the URL-only baseline:
+
+> Lexical URL features are useful for detecting suspicious URLs, but they do not provide sufficient contextual information to reliably distinguish all benign and malicious URLs.
+
+Therefore, the next stage of the system will add domain, DNS, IP/ASN, reputation, and redirect intelligence before incorporating webpage, email, attachment, and behavioral signals.
+## Adversarial URL Testing
+
+A controlled adversarial experiment was performed using 20 benign
+and 20 malicious URLs. Each URL was subjected to seven controlled
+transformations.
+
+| Transformation | Prediction changes | Change rate |
+|---|---:|---:|
+| Deeper subdomain | 9/20 | 45% |
+| Added subdomain | 7/20 | 35% |
+| Case changed | 5/20 | 25% |
+| Encoded path | 4/20 | 20% |
+| Added fragment | 3/20 | 15% |
+| Added path | 3/20 | 15% |
+| Added query | 3/20 | 15% |
+
+The highest prediction-change rates occurred for transformations
+that modified subdomain depth. This is consistent with the model
+using features such as subdomain count, dot count, hostname length,
+and URL length.
+
+The case-change experiment also produced prediction changes,
+which requires additional investigation into case sensitivity
+within feature extraction, particularly suspicious keyword detection.
+
+Prediction changes alone do not establish incorrect classification;
+therefore, the direction of each prediction change and the change
+in malicious probability must be analyzed separately.

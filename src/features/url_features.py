@@ -22,16 +22,35 @@ SUSPICIOUS_KEYWORDS = [
     "authenticate",
 ]
 def normalize_url(url):
+    """
+    Normalize a URL before extracting features.
+
+    Purpose:
+        URLs are generally case-insensitive in their scheme and
+        hostname. Lowercasing prevents the ML feature extractor
+        from treating simple capitalization changes as completely
+        different inputs.
+
+    Important:
+        The original URL should still be preserved separately
+        for reporting and forensic analysis.
+    """
+
+    # Convert the input to a string and remove surrounding spaces.
     url = str(url).strip()
 
+    # Return an empty string if no URL was provided.
     if not url:
         return ""
 
+    # Add a scheme when the dataset does not contain one.
     if not url.startswith(("http://", "https://")):
         url = "http://" + url
 
-    return url
+    # Normalize the URL representation for feature extraction.
+    url = url.lower()
 
+    return url
 def is_ip_address(hostname):
     if not hostname:
         return 0
