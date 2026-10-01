@@ -16,25 +16,22 @@ URL D
 
 The complete chain can later become a feature for our
 phishing risk engine.
+
+SSRF Security:
+Uses safe_fetcher to validate destination IP and prevent DNS rebinding
+at every redirect hop.
 """
 
-import requests
-from urllib.parse import urlparse
-
+from urllib.parse import urljoin
 from src.features.domain_intelligence import normalize_url
+from src.features.safe_fetcher import safe_get, REQUEST_TIMEOUT, MAX_REDIRECTS_DEFAULT
+
+MAX_REDIRECTS = MAX_REDIRECTS_DEFAULT
 
 
-# Maximum number of redirects we allow.
-# This prevents infinite redirect loops.
-MAX_REDIRECTS = 10
-
-# Maximum time to wait for a server response.
-REQUEST_TIMEOUT = 10
-
-
-def analyze_redirect_chain(url):
+def analyze_redirect_chain(url: str, timeout: int = REQUEST_TIMEOUT) -> dict:
     """
-    Follow redirects and return information about the chain.
+    Follow redirects safely and return information about the chain.
 
     Returns:
         A dictionary containing:
@@ -43,56 +40,46 @@ def analyze_redirect_chain(url):
         - number of redirects
         - complete redirect chain
         - HTTP status codes
-        - whether the request failed
+        - whether the request failed or was blocked by SSRF protections
     """
-
     # Normalize the URL before making the request.
     url = normalize_url(url)
 
     redirect_chain = []
     status_codes = []
-
     current_url = url
 
     try:
-
-        # Disable automatic redirect following.
-        # We want to inspect every redirect ourselves.
         for _ in range(MAX_REDIRECTS):
+            # Use safe_fetcher to protect against SSRF and DNS rebinding
+            fetch_result = safe_get(current_url, timeout=timeout)
 
-            response = requests.get(
-                current_url,
-                allow_redirects=False,
-                timeout=REQUEST_TIMEOUT,
-
-                # Use a normal browser-like User-Agent.
-                headers={
-                    "User-Agent": (
-                        "Mozilla/5.0 "
-                        "(Windows NT 10.0; Win64; x64) "
-                        "AppleWebKit/537.36 "
-                        "Chrome/145.0 Safari/537.36"
-                    )
-                }
-            )
-
-            # Store the URL that was actually requested.
+            # Store the URL that was requested
             redirect_chain.append(current_url)
 
-            # Store the HTTP response status.
-            status_codes.append(response.status_code)
+            if not fetch_result.get("success"):
+                is_blocked = fetch_result.get("blocked", False)
+                error_msg = fetch_result.get("reason") or fetch_result.get("error", "Request failed")
+                return {
+                    "success": False,
+                    "blocked": is_blocked,
+                    "original_url": url,
+                    "final_url": current_url,
+                    "redirect_count": max(0, len(redirect_chain) - 1),
+                    "redirect_chain": redirect_chain,
+                    "status_codes": status_codes,
+                    "max_redirects_reached": False,
+                    "error": error_msg
+                }
 
-            # Check whether the response is a redirect.
-            if response.status_code not in (
-                301,
-                302,
-                303,
-                307,
-                308
-            ):
-                # We reached the final destination.
+            status_code = fetch_result.get("status_code", 0)
+            status_codes.append(status_code)
+
+            # Check whether the response is a redirect
+            if status_code not in (301, 302, 303, 307, 308):
                 return {
                     "success": True,
+                    "blocked": False,
                     "original_url": url,
                     "final_url": current_url,
                     "redirect_count": len(redirect_chain) - 1,
@@ -101,13 +88,14 @@ def analyze_redirect_chain(url):
                     "max_redirects_reached": False
                 }
 
-            # Get the destination from the Location header.
-            next_url = response.headers.get("Location")
+            # Get the destination from Location header
+            headers = fetch_result.get("headers", {})
+            next_url = headers.get("Location") or headers.get("location")
 
-            # Some malformed redirects may not contain Location.
             if not next_url:
                 return {
                     "success": True,
+                    "blocked": False,
                     "original_url": url,
                     "final_url": current_url,
                     "redirect_count": len(redirect_chain) - 1,
@@ -116,31 +104,43 @@ def analyze_redirect_chain(url):
                     "max_redirects_reached": False
                 }
 
-            # Convert relative redirects into absolute URLs.
-            next_url = requests.compat.urljoin(
-                current_url,
-                next_url
-            )
+            # Convert relative redirects into absolute URLs
+            next_url = urljoin(current_url, next_url)
+
+            # Detect immediate redirect loop
+            if next_url in redirect_chain:
+                redirect_chain.append(next_url)
+                return {
+                    "success": True,
+                    "blocked": False,
+                    "original_url": url,
+                    "final_url": current_url,
+                    "redirect_count": len(redirect_chain) - 1,
+                    "redirect_chain": redirect_chain,
+                    "status_codes": status_codes,
+                    "max_redirects_reached": False,
+                    "loop_detected": True
+                }
 
             current_url = next_url
 
-        # We reached the safety limit.
+        # Max redirects safety limit reached
         return {
             "success": False,
+            "blocked": True,
             "original_url": url,
             "final_url": current_url,
             "redirect_count": len(redirect_chain) - 1,
             "redirect_chain": redirect_chain,
             "status_codes": status_codes,
-            "max_redirects_reached": True
+            "max_redirects_reached": True,
+            "error": f"Exceeded maximum redirects limit of {MAX_REDIRECTS}"
         }
 
-    except requests.RequestException as error:
-
-        # Network failures are recorded rather than crashing
-        # the entire phishing-analysis pipeline.
+    except Exception as error:
         return {
             "success": False,
+            "blocked": False,
             "original_url": url,
             "final_url": current_url,
             "redirect_count": max(0, len(redirect_chain) - 1),
@@ -153,39 +153,22 @@ def analyze_redirect_chain(url):
 
 def main():
     """
-    Test the redirect analyzer using a few URLs.
+    Test the redirect analyzer.
     """
-
     test_urls = [
         "http://google.com",
         "https://example.com"
     ]
 
-    for url in test_urls:
-
+    for test_url in test_urls:
         print("\n" + "=" * 60)
-        print("Testing:", url)
-
-        result = analyze_redirect_chain(url)
-
-        print("\nOriginal URL:")
-        print(result["original_url"])
-
-        print("\nFinal URL:")
-        print(result["final_url"])
-
-        print("\nRedirect count:")
-        print(result["redirect_count"])
-
-        print("\nStatus codes:")
-        print(result["status_codes"])
-
-        print("\nRedirect chain:")
-
-        for index, redirect_url in enumerate(
-            result["redirect_chain"]
-        ):
-            print(f"{index}: {redirect_url}")
+        print("Testing:", test_url)
+        result = analyze_redirect_chain(test_url)
+        print("\nOriginal URL:", result.get("original_url"))
+        print("Final URL:", result.get("final_url"))
+        print("Redirect count:", result.get("redirect_count"))
+        print("Status codes:", result.get("status_codes"))
+        print("Chain:", result.get("redirect_chain"))
 
 
 if __name__ == "__main__":

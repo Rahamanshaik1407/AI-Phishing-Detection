@@ -1,3 +1,37 @@
+# Environment and secrets
+.env
+.env.*
+*.env
+
+# Python bytecode and cache
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
 .venv/
+env/
+venv/
+ENV/
+
+# Databases
 *.db
+*.sqlite
+*.sqlite3
+
+# Upload and quarantine directory
+data/quarantine/
+quarantine/
+
+# Test artifacts and temporary files
+*.tmp
+*.log
+tests/.pytest_cache/
+
+# System files
+.DS_Store
+Thumbs.db
