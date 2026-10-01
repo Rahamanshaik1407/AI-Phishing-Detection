@@ -1,4 +1,5 @@
 """
+
 Dynamic malware-analysis engine.
 
 This module prepares telemetry collected from an isolated
@@ -7,7 +8,7 @@ sandbox and converts it into behavioral features.
 IMPORTANT:
 This module does NOT execute malware.
 """
-
+from src.sandbox.telemetry_collector import create_demo_telemetry
 
 from src.sandbox.telemetry_schema import create_empty_telemetry
 
@@ -159,17 +160,17 @@ def create_test_telemetry():
     ]
 
     return telemetry
-
-
 if __name__ == "__main__":
 
-    # Use synthetic telemetry instead of executing malware.
-    telemetry = create_test_telemetry()
+    # Generate synthetic telemetry.
+    # No executable is launched.
+    telemetry = create_demo_telemetry()
 
+    # Convert raw telemetry into behavioral features.
     result = analyze_behavior(telemetry)
 
     print("\n" + "=" * 60)
-    print("DYNAMIC ANALYSIS ENGINE TEST")
+    print("DYNAMIC ANALYSIS PIPELINE TEST")
     print("=" * 60)
 
     print("\nBehavioral Features:")

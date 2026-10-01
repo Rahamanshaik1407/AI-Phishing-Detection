@@ -1,0 +1,8 @@
+transformation,tests,prediction_changes,change_rate_percent
+added_fragment,20,3,15.0
+added_path,20,3,15.0
+added_query,20,3,15.0
+added_subdomain,20,7,35.0
+case_changed,20,5,25.0
+deeper_subdomain,20,9,45.0
+encoded_path,20,4,20.0
