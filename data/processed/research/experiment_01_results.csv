@@ -1,0 +1,7 @@
+experiment_key,experiment_name,layers_evaluated,sample_count,accuracy,precision,recall,f1,roc_auc,tp,fp,tn,fn,elapsed_seconds,ms_per_sample,status,layer_notes
+Experiment_A,Experiment A (URL Only - ML Model),URL_Lexical,500,0.53,0.8571,0.072,0.1328,0.5112,18,3,247,232,0.022,0.04,COMPLETED,All evaluated layers available
+Experiment_B,Experiment B (URL + Domain Intelligence),URL_Lexical + Domain_Brand_Heuristics,500,0.5,0.0,0.0,0.0,0.5296,0,0,250,250,0.312,0.62,COMPLETED,All evaluated layers available
+Experiment_C,Experiment C (URL + Domain + Email),URL_Lexical + Domain (Email=UNKNOWN),500,0.5,0.0,0.0,0.0,0.5296,0,0,250,250,0.288,0.58,EVALUATED_WITH_MISSING_LAYER_FLAGS,UNKNOWN_NOT_AVAILABLE (No paired email headers in URL dataset)
+Experiment_D,Experiment D (URL + Domain + Email + Webpage),"URL_Lexical + Domain (Email=UNKNOWN, Webpage=UNKNOWN)",500,0.5,0.0,0.0,0.0,0.5296,0,0,250,250,0.295,0.59,EVALUATED_WITH_MISSING_LAYER_FLAGS,UNKNOWN_NOT_AVAILABLE (Offline evaluation; no live DOM capture)
+Experiment_E,Experiment E (URL + Domain + Email + Webpage + Attachment),"URL_Lexical + Domain (Email=UNKNOWN, Webpage=UNKNOWN, Attachment=UNKNOWN)",500,0.5,0.0,0.0,0.0,0.5296,0,0,250,250,0.313,0.63,EVALUATED_WITH_MISSING_LAYER_FLAGS,UNKNOWN_NOT_AVAILABLE (URL samples contain no file attachments)
+Experiment_F,Experiment F (Full PHISHGUARD Multi-Layer System),Unified_Pipeline (ML + Rules + Evidence_Correlation + MultiLayer_Risk),500,0.5,0.0,0.0,0.0,0.5296,0,0,250,250,0.321,0.64,COMPLETED,All evaluated layers available

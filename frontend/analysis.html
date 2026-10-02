@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHISHGUARD – Analyze</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/analysis.css" />
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-brand">PHISHGUARD</div>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="analysis.html" class="active">Analyze</a>
+    <a href="history.html">History</a>
+    <a href="#">Threat Intelligence</a>
+    <a href="#">Reports</a>
+    <a href="analyst.html">AI Security Analyst</a>
+    <div class="sidebar-section">
+      <a href="settings.html">Settings</a>
+      <a href="#" id="logout-link">Logout</a>
+    </div>
+  </nav>
+  <div class="main-content">
+    <header>
+      <h1>Analyze a Threat</h1>
+      <p class="text-muted">Submit artifacts for multi-layer AI threat analysis</p>
+    </header>
+
+    <!-- Analysis Type Tabs -->
+    <div class="analysis-tabs">
+      <button class="tab-btn active" data-tab="url-section">URL</button>
+      <button class="tab-btn" data-tab="hash-section">Hash</button>
+      <button class="tab-btn" data-tab="email-section">Email</button>
+      <button class="tab-btn" data-tab="qr-section">QR Code</button>
+      <button class="tab-btn" data-tab="file-section">File</button>
+    </div>
+
+    <section class="analysis-section active" id="url-section">
+      <h2>URL Analysis</h2>
+      <div class="analysis-input">
+        <input type="text" id="url-input" placeholder="Enter URL to analyze (e.g. https://example.com/login)" />
+        <button id="url-analyze-btn">Analyze URL &rarr;</button>
+      </div>
+      <div class="result-card" id="url-result"></div>
+    </section>
+
+    <section class="analysis-section" id="hash-section">
+      <h2>Hash Analysis</h2>
+      <div class="analysis-input">
+        <input type="text" id="hash-input" placeholder="Enter SHA256, MD5, or SHA1 hash" />
+        <button id="hash-analyze-btn">Analyze Hash &rarr;</button>
+      </div>
+      <div class="result-card" id="hash-result"></div>
+    </section>
+
+    <section class="analysis-section" id="email-section">
+      <h2>Email Analysis</h2>
+      <div class="analysis-input">
+        <input type="file" id="email-file" accept=".eml,.msg" />
+        <button id="email-analyze-btn">Analyze Email &rarr;</button>
+      </div>
+      <div class="result-card" id="email-result"></div>
+    </section>
+
+    <section class="analysis-section" id="qr-section">
+      <h2>QR Code Analysis</h2>
+      <div class="analysis-input">
+        <input type="file" id="qr-file" accept="image/*" />
+        <button id="qr-analyze-btn">Analyze QR &rarr;</button>
+      </div>
+      <div class="result-card" id="qr-result"></div>
+    </section>
+
+    <section class="analysis-section" id="file-section">
+      <h2>File Analysis</h2>
+      <div class="analysis-input">
+        <input type="file" id="generic-file" />
+        <button id="file-analyze-btn">Analyze File &rarr;</button>
+      </div>
+      <div class="result-card" id="file-result"></div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/auth.js';
+    import { analysis } from './js/analysis.js';
+
+    document.getElementById('logout-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      auth.logout();
+    });
+
+    // Tab switching logic
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.analysis-section').forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      analysis.init();
+    });
+  </script>
+</body>
+</html>

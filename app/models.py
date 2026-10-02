@@ -104,6 +104,17 @@ class AnalysisResult(Base):
         nullable=False
     )
 
+    artifact_type = Column(
+        String(50),
+        nullable=False,
+        default="unknown"
+    )
+
+    details = Column(
+        Text,
+        nullable=True
+    )
+
     explanation = Column(
         Text,
         nullable=True

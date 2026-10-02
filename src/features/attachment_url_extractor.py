@@ -477,3 +477,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def extract_urls_from_attachment(file_path):
+    """Compatibility wrapper for legacy import.
+
+    Historically the unified analyzer imported `extract_urls_from_attachment`
+    from this module. The actual implementation is `extract_embedded_urls`.
+    This wrapper simply forwards the call.
+    """
+    return extract_embedded_urls(file_path)

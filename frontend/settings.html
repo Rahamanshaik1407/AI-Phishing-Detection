@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHISHGUARD – Settings</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-brand">PHISHGUARD</div>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="analysis.html">Analyze</a>
+    <a href="history.html">History</a>
+    <a href="#">Threat Intelligence</a>
+    <a href="#">Reports</a>
+    <a href="analyst.html">AI Security Analyst</a>
+    <div class="sidebar-section">
+      <a href="settings.html" class="active">Settings</a>
+      <a href="#" id="logout-link">Logout</a>
+    </div>
+  </nav>
+  <div class="main-content">
+    <header>
+      <h1>Account Settings</h1>
+    </header>
+    <section>
+      <div class="card" style="max-width: 600px;">
+        <h3>Profile</h3>
+        <p>Email: <span id="user-email" style="font-weight: 600;"></span></p>
+      </div>
+    </section>
+    <section style="margin-top: 1.5rem;">
+      <div class="card" style="max-width: 600px;">
+        <h3>Change Password</h3>
+        <form id="change-pwd-form" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+          <label for="old_pwd">Current Password</label>
+          <input type="password" id="old_pwd" placeholder="Enter current password" required />
+          <label for="new_pwd">New Password</label>
+          <input type="password" id="new_pwd" placeholder="Enter new password" required />
+          <label for="confirm_pwd">Confirm New Password</label>
+          <input type="password" id="confirm_pwd" placeholder="Confirm new password" required />
+          <button type="submit" class="btn btn-primary" style="align-self: flex-start; margin-top: 0.5rem;">Update Password &rarr;</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/auth.js';
+    import * as api from './js/api.js';
+
+    document.getElementById('logout-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      auth.logout();
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const user = await api.getMe();
+        document.getElementById('user-email').textContent = user.email;
+      } catch(err) {
+        auth.logout();
+      }
+    });
+
+    document.getElementById('change-pwd-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const oldPwd = e.target.old_pwd.value;
+      const newPwd = e.target.new_pwd.value;
+      const confirm = e.target.confirm_pwd.value;
+      if (newPwd !== confirm) { alert('Passwords do not match'); return; }
+      try {
+        await api.changePassword({ old_password: oldPwd, new_password: newPwd });
+        alert('Password changed successfully');
+        e.target.reset();
+      } catch(err) {
+        alert('Failed: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHISHGUARD – History</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-brand">PHISHGUARD</div>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="analysis.html">Analyze</a>
+    <a href="history.html" class="active">History</a>
+    <a href="#">Threat Intelligence</a>
+    <a href="#">Reports</a>
+    <a href="analyst.html">AI Security Analyst</a>
+    <div class="sidebar-section">
+      <a href="settings.html">Settings</a>
+      <a href="#" id="logout-link">Logout</a>
+    </div>
+  </nav>
+  <div class="main-content">
+    <header>
+      <h1>Analysis History</h1>
+      <p class="text-muted">Review past threat analysis results</p>
+    </header>
+    <section>
+      <div class="card">
+        <p id="no-history-msg">Loading history...</p>
+        <table class="table" id="history-table" style="display:none;">
+          <thead>
+            <tr><th>ID</th><th>Type</th><th>Risk Score</th><th>Level</th><th>Date</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/auth.js';
+    import { history } from './js/history.js';
+
+    document.getElementById('logout-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      auth.logout();
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await history.load();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHISHGUARD – Dashboard</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-brand">PHISHGUARD</div>
+    <a href="dashboard.html" class="active">Dashboard</a>
+    <a href="analysis.html">Analyze</a>
+    <a href="history.html">History</a>
+    <a href="#">Threat Intelligence</a>
+    <a href="#">Reports</a>
+    <a href="analyst.html">AI Security Analyst</a>
+    <div class="sidebar-section">
+      <a href="settings.html">Settings</a>
+      <a href="#" id="logout-link">Logout</a>
+    </div>
+  </nav>
+  <div class="main-content">
+    <header class="dashboard-header">
+      <h1>Security Overview</h1>
+      <span id="user-email"></span>
+    </header>
+    <section class="dashboard-cards">
+      <div class="dashboard-card">
+        <div class="card-icon blue">&#x1F4CA;</div>
+        <div class="card-label">Total Analyses</div>
+        <div class="card-value" id="total-analyses">0</div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon green">&#x1F6E1;&#xFE0F;</div>
+        <div class="card-label">Threats Detected</div>
+        <div class="card-value" id="risk-medium">0</div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon red">&#x26A0;&#xFE0F;</div>
+        <div class="card-label">High Risk</div>
+        <div class="card-value" id="risk-high">0</div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon purple">&#x1F512;</div>
+        <div class="card-label">Low Risk</div>
+        <div class="card-value" id="risk-low">0</div>
+      </div>
+    </section>
+    <section class="dashboard-table">
+      <h2>Recent Analyses</h2>
+      <table class="table" id="recent-table">
+        <thead>
+          <tr><th>ID</th><th>Type</th><th>Risk</th><th>Date</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/auth.js';
+    import * as api from './js/api.js';
+    import { dashboard } from './js/dashboard.js';
+
+    document.getElementById('logout-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      auth.logout();
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const user = await api.getMe();
+        document.getElementById('user-email').textContent = user.email;
+        await dashboard.loadStats();
+        await dashboard.loadRecent();
+      } catch (err) {
+        console.error(err);
+        auth.logout();
+      }
+    });
+  </script>
+</body>
+</html>

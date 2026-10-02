@@ -16,7 +16,10 @@ pipeline so that the same:
 features can be applied.
 """
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    cv2 = None  # Optional dependency, QR analysis will be unavailable
 
 
 def decode_qr_code(image_path):

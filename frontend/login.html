@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHISHGUARD – Sign In</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body style="background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+  <div class="auth-container">
+    <div class="auth-brand">PHISHGUARD</div>
+    <h2>Welcome back</h2>
+    <p class="auth-subtitle">Sign in to your account</p>
+    <form id="login-form">
+      <label for="email_or_username">Email or Username</label>
+      <input type="text" id="email_or_username" name="email_or_username" placeholder="Enter your email or username" required />
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Enter your password" required />
+      <button type="submit">Sign in &rarr;</button>
+    </form>
+    <p class="auth-footer">Don't have an account? <a href="signup.html">Create account</a></p>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/auth.js';
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailOrUsername = e.target.email_or_username.value.trim();
+      const password = e.target.password.value;
+      try {
+        const token = await auth.login(emailOrUsername, password);
+        sessionStorage.setItem('jwt', token);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        alert('Login failed: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
